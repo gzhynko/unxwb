@@ -33,16 +33,9 @@
   many informations about XWB files are available in xact2wb.h and xact3wb.h from the DirectX SDK
 */
 
-#ifdef WIN32
-    #include <direct.h>
-    HWND    mywnd   = NULL;
-    char *get_file(char *title, int xwb, int multi);
-    char *get_folder(char *title);
-#else
-    #include <unistd.h>
-    #define stricmp     strcasecmp
-    #define strnicmp    strncasecmp
-#endif
+#include <unistd.h>
+#define stricmp     strcasecmp
+#define strnicmp    strncasecmp
 
 typedef uint8_t     u8;
 typedef uint16_t    u16;
@@ -163,54 +156,6 @@ int main(int argc, char *argv[]) {
         "e-mail: aluigi@autistici.org\n"
         "web:    aluigi.org\n"
         "\n", stderr);
-
-#ifdef WIN32
-    mywnd = GetForegroundWindow();
-    if(GetWindowLong(mywnd, GWL_WNDPROC)) {
-        num = 0;
-        for(i = 1; i < argc; i++) {
-            if(((argv[i][0] != '-') && (argv[i][0] != '/')) || (strlen(argv[i]) != 2)) {
-                break;
-            }
-            switch(argv[i][1]) {
-                case 'd': i++; num = 1; break;  // output folder already selected
-                case 'b': i += 2;       break;
-                case 'x': i++;          break;
-                case 'r': i++;          break;
-                case 's': i++;          break;
-                default: break;
-            }
-        }
-        if(i > argc) i = argc;
-        int rem_args = num ? 1 : 3;
-        i = rem_args - (argc - i);
-        if(i > 0) {
-            printf(
-                "- GUI mode activated, remember that the tool works also from command-line\n"
-                "  where are available various options\n"
-                "\n");
-            p = calloc(argc + i + 3, sizeof(char *));   // was + 1 but this code is a bit chaotic so stay safe
-            if(!p) std_err();
-            memcpy(p, argv, sizeof(char *) * argc);
-            argv = (void *)p;
-            argc -= (rem_args - i);
-            char    **lame = NULL;  // long story
-            if(num) {
-                if(i >= 1) argv[argc++] = get_file("select the input XWB archive to extract", 1, 0);
-            } else {
-                if(i < 3) { // lame backup
-                    if(i >= 1) argv[argc + 1] = argv[argc];
-                    if(i >= 2) argv[argc + 2] = argv[argc];
-                }
-                if(i >= 1) argv[argc++] = "-d";
-                if(i >= 2) lame = &argv[argc++];
-                if(i >= 3) argv[argc] = get_file("select the input XWB archive to extract", 1, 0);
-                argc++;
-                *lame = get_folder("select the output folder where extracting the files");
-            }
-        }
-    }
-#endif
 
     if(argc < 2) {
         fprintf(stderr,
@@ -741,78 +686,6 @@ u8 *mystrrchrs(u8 *str, u8 *chrs) {
     return(ret);
 }
 
-
-
-#ifdef WIN32
-char *get_file(char *title, int xwb, int multi) {
-    OPENFILENAME    ofn;
-    int     maxlen;
-    char    *filename;
-
-    if(multi) {
-        maxlen = 32768; // 32k limit ansi, no limit unicode
-    } else {
-        maxlen = PATHSZ;
-    }
-    filename = malloc(maxlen + 1);
-    if(!filename) std_err();
-    filename[0] = 0;
-    memset(&ofn, 0, sizeof(ofn));
-    ofn.lStructSize     = sizeof(ofn);
-    if(xwb) {
-        ofn.lpstrFilter =
-            "XWB archive\0" "*.xwb;*.xen\0"
-            "(*.*)\0"       "*.*\0"
-            "\0"            "\0";
-    } else {
-        ofn.lpstrFilter =
-            "(*.*)\0"       "*.*\0"
-            "\0"            "\0";
-    }
-    ofn.nFilterIndex    = 1;
-    ofn.lpstrFile       = filename;
-    ofn.nMaxFile        = maxlen;
-    ofn.lpstrTitle      = title;
-    ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST |
-                          OFN_LONGNAMES     | OFN_EXPLORER |
-                          OFN_HIDEREADONLY  | OFN_ENABLESIZING;
-    if(multi) ofn.Flags |= OFN_ALLOWMULTISELECT;
-
-    printf("- %s\n", ofn.lpstrTitle);
-    if(!GetOpenFileName(&ofn)) exit(1); // terminate immediately
-    return(filename);
-}
-
-char *get_folder(char *title) {
-    OPENFILENAME    ofn;
-    char    *p;
-    char    *filename;
-
-    filename = malloc(PATHSZ + 1);
-    if(!filename) std_err();
-
-    strcpy(filename, "enter in the output folder and press Save");
-    memset(&ofn, 0, sizeof(ofn));
-    ofn.lStructSize     = sizeof(ofn);
-    ofn.lpstrFilter     = "(*.*)\0" "*.*\0" "\0" "\0";
-    ofn.nFilterIndex    = 1;
-    ofn.lpstrFile       = filename;
-    ofn.nMaxFile        = PATHSZ;
-    ofn.lpstrTitle      = title;
-    ofn.Flags           = OFN_PATHMUSTEXIST | /*OFN_FILEMUSTEXIST |*/
-                          OFN_LONGNAMES     | OFN_EXPLORER |
-                          OFN_HIDEREADONLY  | OFN_ENABLESIZING;
-
-    printf("- %s\n", ofn.lpstrTitle);
-    if(!GetSaveFileName(&ofn)) exit(1); // terminate immediately
-    p = mystrrchrs(filename, "\\/");
-    if(p) *p = 0;
-    return(filename);
-}
-#endif
-
-
-
 int xsb_names(FILE *fd, char *name, int track) {
     int     i;
     char    *p;
@@ -1239,14 +1112,6 @@ void std_err(void) {
 
 
 void myexit(int ret) {
-#ifdef WIN32
-    u8      ans[16];
-
-    if(GetWindowLong(mywnd, GWL_WNDPROC)) {
-        printf("\nPress RETURN to quit");
-        fgets(ans, sizeof(ans), stdin);
-    }
-#endif
     exit(ret);
 }
 
