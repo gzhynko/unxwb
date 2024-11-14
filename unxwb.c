@@ -106,7 +106,7 @@ int     execlen     = 0,
 u8      *tmpexec    = NULL,
         *execstring = NULL;
 
-int run_unxwb(int argc, char *argv[]) {
+int run_unxwb(char* wavebank_path, char* output_dir) {
     WAVEBANKHEADER  wavebankheader;
     WAVEBANKENTRY   wavebankentry;
     WAVEBANKDATA    wavebankdata;
@@ -155,6 +155,7 @@ int run_unxwb(int argc, char *argv[]) {
         "web:    aluigi.org\n"
         "\n", stderr);
 
+    /*
     if(argc < 2) {
         fprintf(stderr,
             "\n"
@@ -182,39 +183,13 @@ int run_unxwb(int argc, char *argv[]) {
             "-R        raw output files (by default the tool adds headers and extensions)");
         myexit(1);
     }
+    */
 
     fdinfo = stdout;
 
-    argc--;
-    for(i = 1; i < argc; i++) {
-        switch(argv[i][1]) {
-            case 'l': list        = 1;                  break;
-            case 'd': outdir      = argv[++i];          break;
-            case 'v': verbose     = 1;                  break;
-            case 'b': {
-                xsbname  = argv[++i];
-                xsboff   = get_num(argv[++i]);
-                break;
-            }
-            case 'x': file_offset = get_num(argv[++i]); break;
-            case 'r': exec_arg(argv[++i]);              break;
-            case 'R': rawfiles    = 1;                  break;
-            case 'a': rawfiles    = 0;                  break;  // like in fsbext
-            case 'o': {
-                dostdout = 1;
-                fdinfo   = stderr;
-                break;
-            }
-            case 's': hexseg      = get_num(argv[++i]); break;
-            case 'D': hex_names   = 0;                  break;
-            default: {
-                fprintf(stderr, "\nError: wrong command-line argument (%s)\n\n", argv[i]);
-                myexit(1);
-            }
-        }
-    }
-
-    xwbname = argv[argc];
+    printf("wavebank_path: %s\n", wavebank_path);
+    outdir = output_dir;
+    xwbname = wavebank_path;
 
     if(!strcmp(xwbname, "-")) {
         fprintf(fdinfo, "- open file         %s\n", "stdin");
