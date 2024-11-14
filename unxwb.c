@@ -106,9 +106,11 @@ int     execlen     = 0,
 u8      *tmpexec    = NULL,
         *execstring = NULL;
 
-
-
 int main(int argc, char *argv[]) {
+    return 0;
+}
+
+int run_unxwb(int argc, char *argv[]) {
     WAVEBANKHEADER  wavebankheader;
     WAVEBANKENTRY   wavebankentry;
     WAVEBANKDATA    wavebankdata;
@@ -663,8 +665,7 @@ wavebank_handle:
     if(fdxsb) fclose(fdxsb);
     fclose(fd);
     fprintf(fdinfo, "\n- finished (%u files)\n\n", wavebankdata.dwEntryCount);
-    myexit(0);
-    return(0);
+    return 0;
 }
 
 
