@@ -187,7 +187,6 @@ int run_unxwb(char* wavebank_path, char* output_dir) {
 
     fdinfo = stdout;
 
-    printf("wavebank_path: %s\n", wavebank_path);
     outdir = output_dir;
     xwbname = wavebank_path;
 
