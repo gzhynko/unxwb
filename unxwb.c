@@ -106,10 +106,6 @@ int     execlen     = 0,
 u8      *tmpexec    = NULL,
         *execstring = NULL;
 
-int main(int argc, char *argv[]) {
-    return 0;
-}
-
 int run_unxwb(int argc, char *argv[]) {
     WAVEBANKHEADER  wavebankheader;
     WAVEBANKENTRY   wavebankentry;
